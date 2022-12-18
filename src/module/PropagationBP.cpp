@@ -6,23 +6,23 @@
 
 namespace crpropa {
 	void PropagationBP::tryStep(const Y &y, Y &out, Y &error, double h,
-			ParticleState &particle, double z, double m, double q) const {
-		out = dY(y.x, y.u, h, z, q, m);  // 1 step with h
+			ParticleState &particle, double z, double m, double q, Vector3d &B) const {
+		out = dY(y.x, y.u, h, z, q, m, B);  // 1 step with h
 
-		Y outHelp = dY(y.x, y.u, h/2, z, q, m);  // 2 steps with h/2
-		Y outCompare = dY(outHelp.x, outHelp.u, h/2, z, q, m);
+		Y outHelp = dY(y.x, y.u, h/2, z, q, m, B);  // 2 steps with h/2
+		Y outCompare = dY(outHelp.x, outHelp.u, h/2, z, q, m, B);
 
 		error = errorEstimation(out.x , outCompare.x , h);
 	}
 
 
 	PropagationBP::Y PropagationBP::dY(Vector3d pos, Vector3d dir, double step,
-			double z, double q, double m) const {
+			double z, double q, double m, Vector3d &B) const {
 		// half leap frog step in the position
 		pos += dir * step / 2.;
 
 		// get B field at particle position
-		Vector3d B = getFieldAtPosition(pos, z);
+		B = getFieldAtPosition(pos, z);
 
 		// Boris help vectors
 		Vector3d t = B * q / 2 / m * step / c_light;
@@ -82,6 +82,8 @@ namespace crpropa {
 		double z = candidate->getRedshift();
 		double m = current.getEnergy()/(c_light * c_light);
 
+		Vector3d B = Vector3d(1.0, 0, 0);
+
 		// if minStep is the same as maxStep the adaptive algorithm with its error
 		// estimation is not needed and the computation time can be saved:
 		if (minStep == maxStep){
@@ -89,7 +91,7 @@ namespace crpropa {
 			Vector3d pos = current.getPosition();
 			Vector3d dir = current.getDirection();
 			// half leap frog step in the position
-			Y yOut = dY(pos, dir, step, z, q, m);
+			Y yOut = dY(pos, dir, step, z, q, m, B);
 
 			// full leap frog step in the velocity
 			candidate->current.setDirection(yOut.u);
@@ -107,7 +109,7 @@ namespace crpropa {
 
 		// try performing step until the target error (tolerance) or the minimum step size has been reached
 		while (true) {
-			tryStep(yIn, yOut, yErr, step, current, z, m, q);
+			tryStep(yIn, yOut, yErr, step, current, z, m, q, B);
 			r = yErr.u.getR() / tolerance;  // ratio of absolute direction error and tolerance
 			if (r > 1) {  // large direction error relative to tolerance, try to decrease step size
 				if (step == minStep)  // already minimum step size
@@ -130,6 +132,8 @@ namespace crpropa {
 
 		current.setPosition(yOut.x);
 		current.setDirection(yOut.u.getUnitVector());
+		std::cout << B.x << B.y << B.z << std::endl;
+		current.setMagneticField(B);
 		candidate->setCurrentStep(step);
 		candidate->setNextStep(newStep);
 	}
