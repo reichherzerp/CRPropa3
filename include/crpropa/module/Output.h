@@ -29,6 +29,7 @@ namespace crpropa {
  . E			 CurrentEnergyColumn
  . X/Y/Z		 CurrentPositionColumn
  . Px/Py/Pz		 CurrentDirectionColumn
+ . Bx/By/Bz		 CurrentMagneticFiledColumn
  . SN0			 SourceSerialNumberColumn
  . ID0			 SourceIdColumn
  . E0			 SourceEnergyColumn
@@ -77,6 +78,7 @@ public:
 		CurrentEnergyColumn,
 		CurrentPositionColumn,
 		CurrentDirectionColumn,
+		CurrentMagneticFieldColumn,
 		SourceIdColumn,
 		SourceEnergyColumn,
 		SourcePositionColumn,
