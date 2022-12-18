@@ -36,6 +36,14 @@ const Vector3d &ParticleState::getDirection() const {
 	return direction;
 }
 
+void ParticleState::setMagneticField(const Vector3d &b) {
+	magneticField = b;
+}
+
+const Vector3d &ParticleState::getMagneticField() const {
+	return magneticField;
+}
+
 void ParticleState::setEnergy(double newEnergy) {
 	energy = std::max(0., newEnergy); // prevent negative energies
 }
@@ -89,10 +97,6 @@ Vector3d ParticleState::getVelocity() const {
 
 Vector3d ParticleState::getMomentum() const {
 	return direction * (energy / c_light);
-}
-
-Vector3d ParticleState::getMagneticField() const {
-	return magneticField;
 }
 
 std::string ParticleState::getDescription() const {

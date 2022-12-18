@@ -65,7 +65,7 @@ public:
 	/** Get magnetic field vector
 	 @returns magnetic field vector [T].
 	 */
-	Vector3d getMagneticField() const;
+	const Vector3d &getMagneticField() const;
 
 	/** Set energy of particle.
 	 @param newEnergy	energy to be assigned to particle [in Joules]
