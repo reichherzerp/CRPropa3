@@ -68,6 +68,8 @@ void TextOutput::printHeader() const {
 		*out << "\tX\tY\tZ";
 	if (fields.test(CurrentDirectionColumn) && not oneDimensional)
 		*out << "\tPx\tPy\tPz";
+	if (fields.test(CurrentMagneticFieldColumn) && not oneDimensional)
+		*out << "\tBx\tBy\tBz";
 	if (fields.test(SerialNumberColumn))
 		*out << "\tSN0";
 	if (fields.test(SourceIdColumn))
@@ -121,6 +123,8 @@ void TextOutput::printHeader() const {
 			|| fields.test(CreatedDirectionColumn)
 			|| fields.test(SourceDirectionColumn))
 		*out << "# Px/P0x/P1x... Heading (unit vector of momentum)\n";
+	if (fields.test(CurrentMagneticFieldColumn))
+		*out << "# Bx/By/By... Magnetic field at position [T]\n";
 	if (fields.test(WeightColumn))
 		*out << "# W             Weights" << " \n";
 	for(std::vector<Property>::const_iterator iter = properties.begin();
@@ -186,6 +190,13 @@ void TextOutput::process(Candidate *c) const {
 			const Vector3d pos = c->current.getDirection();
 			p += std::sprintf(buffer + p, "%8.5E\t%8.5E\t%8.5E\t", pos.x, pos.y,
 					pos.z);
+		}
+	}
+	if (fields.test(CurrentMagneticFieldColumn)) {
+		if (not oneDimensional) {
+			const Vector3d B = c->current.getMagneticField();
+			p += std::sprintf(buffer + p, "%8.5E\t%8.5E\t%8.5E\t", B.x, B.y,
+					B.z);
 		}
 	}
 
