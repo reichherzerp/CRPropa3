@@ -25,6 +25,7 @@ private:
 	double energy; ///< total energy
 	Vector3d position; ///< position vector in comoving coordinates
 	Vector3d direction; ///< unit vector of velocity or momentum
+	Vector3d magneticField; ///< magnetic field vector
 	double pmass; ///< particle rest mass
 	double charge; ///< particle charge
 
@@ -34,10 +35,12 @@ public:
 	 @param energy		energy of the particle [in Joules]
 	 @param position	vector containing the coordinates of the particle [in meters]
 	 @param direction	vector containing the direction of motion of the particle
+	 @param magneticField
 	 */
 	ParticleState(int id = 0, double energy = 0,
 			Vector3d position = Vector3d(0, 0, 0),
-			Vector3d direction = Vector3d(-1, 0, 0));
+			Vector3d direction = Vector3d(-1, 0, 0),
+			Vector3d magneticField = Vector3d(0, 0, 0));
 
 	/** Set particle position.
 	 In simulations including cosmological effects, the position is given in comoving coordinates.
@@ -57,6 +60,12 @@ public:
 	 @returns Normalized vector containing direction of motion of particle.
 	 */
 	const Vector3d &getDirection() const;
+
+	void setMagneticField(const Vector3d &magneticField);
+	/** Get magnetic field vector
+	 @returns magnetic field vector [T].
+	 */
+	Vector3d getMagneticField() const;
 
 	/** Set energy of particle.
 	 @param newEnergy	energy to be assigned to particle [in Joules]
