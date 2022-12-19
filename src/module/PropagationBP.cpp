@@ -96,6 +96,7 @@ namespace crpropa {
 			// full leap frog step in the velocity
 			candidate->current.setDirection(yOut.u);
 			candidate->current.setPosition(yOut.x);
+			candidate->current.setMagneticField(B);
 			candidate->setCurrentStep(step);
 			candidate->setNextStep(step);
 			return;
@@ -132,7 +133,6 @@ namespace crpropa {
 
 		current.setPosition(yOut.x);
 		current.setDirection(yOut.u.getUnitVector());
-		std::cout << B.x << B.y << B.z << std::endl;
 		current.setMagneticField(B);
 		candidate->setCurrentStep(step);
 		candidate->setNextStep(newStep);
