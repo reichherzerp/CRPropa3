@@ -1,8 +1,11 @@
 #include "crpropa/module/PropagationRS.h"
+#include "crpropa/Random.h"
 
 #include <sstream>
 #include <stdexcept>
 #include <vector>
+
+
 
 namespace crpropa {
 	void PropagationRS::tryStep(const Y &y, Y &out, Y &error, double h,
@@ -18,23 +21,29 @@ namespace crpropa {
 
 	PropagationRS::Y PropagationRS::dY(Vector3d pos, Vector3d dir, double step,
 			double z, double q, double m) const {
-		// half leap frog step in the position
-		pos += dir * step / 2.;
 
 		// get B field at particle position
 		Vector3d B = getFieldAtPosition(pos, z);
 
-		// Boris help vectors
-		Vector3d t = B * q / 2 / m * step / c_light;
-		Vector3d s = t * 2 / (1 + t.dot(t));
-		Vector3d v_help;
+		// compute pitch angle
+		double mu = dir.getAngleTo(B);
+		double deltaT = step / c_light;  
+		double scatteringRate = pc / c_light; // step should be smaller than pc
+		if (scatteringRate * deltaT > 1) {
+			scatteringRate = 1 / deltaT;
+		}
 
-		// Boris push
-		v_help = dir + dir.cross(t);
-		dir = dir + v_help.cross(s);
+		Random random;
+		int seed = 1;
+		if (seed != 0)
+			random.seed(seed); // use given seed
+		double phi = random.randUniform(0, 2 * M_PI);
 
-		// the other half leap frog step in the position
-		pos += dir * step / 2.;
+		double deltaMu = 2 * sqrt(scatteringRate * (1 - pow(mu, 2)) * deltaT) * sin(phi);
+
+		dir.getRotated(dir, deltaMu);
+
+		pos += dir * step;
 		return Y(pos, dir);
 	}
 
@@ -87,7 +96,7 @@ namespace crpropa {
 		// if minStep is the same as maxStep the adaptive algorithm with its error
 		// estimation is not needed and the computation time can be saved:
 		if (minStep == maxStep){
-			tryStep(yIn, yOut, yErr, step, current, z, m, q);
+			yOut = dY(yIn.x, yIn.u, step, z, q, m);
 		} else {
 			step = clip(candidate->getNextStep(), minStep, maxStep);
 			newStep = step;
