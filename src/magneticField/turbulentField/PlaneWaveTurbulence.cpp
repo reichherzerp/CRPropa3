@@ -76,7 +76,7 @@ double hsum_double_avx(__m256d v) {
 #endif // defined(ENABLE_FAST_WAVES)
 
 PlaneWaveTurbulence::PlaneWaveTurbulence(const TurbulenceSpectrum &spectrum,
-                                         int Nm, int seed)
+                                         int Nm, int seed, std::string turbType)
     : TurbulentField(spectrum), Nm(Nm) {
 
 #ifdef ENABLE_FAST_WAVES
@@ -143,15 +143,16 @@ PlaneWaveTurbulence::PlaneWaveTurbulence(const TurbulenceSpectrum &spectrum,
 		// these values to generate a random vector perpendicular to kappa.
 		double phi = random.randUniform(-M_PI, M_PI);
 		double costheta = 0.0;
-		if (turbType == THREE_D) {
+		std::cout << turbType << std::endl;
+		if (turbType == "3D") {
 			costheta = random.randUniform(-1., 1.);
-		} else if (turbType == SLAB_1D) {
+		} else if (turbType == "slab") {
 			costheta = 1.0;
 		} 
 		double sintheta = sqrt(1 - costheta * costheta);
 
 		double alpha = 0.0;
-		if (turbType != SLAB_1D) {
+		if (turbType != "slab") {
 			alpha = random.randUniform(0, 2 * M_PI);
 		}
 		double beta = random.randUniform(0, 2 * M_PI);

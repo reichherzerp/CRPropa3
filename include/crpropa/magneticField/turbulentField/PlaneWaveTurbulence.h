@@ -11,9 +11,9 @@ namespace crpropa {
 If set to TWO_D, use isotropic 2D turbulence
 If set to SLAB_1D, use slab turbulence */
 enum turbulenceType {
-  THREE_D = 0,
+  THREE_D,
   TWO_D,
-  SLAB_1D
+  SLAB_1D = 0
 };
 
 /**
@@ -128,7 +128,6 @@ class PlaneWaveTurbulence : public TurbulentField {
 	static const int ikkappa2 = 5;
 	static const int ibeta = 6;
 	static const int itotal = 7;
-	turbulenceType turbType; /**< Type of turbulence */
 
 
   public:
@@ -144,7 +143,7 @@ class PlaneWaveTurbulence : public TurbulentField {
 	   seed of 0 will lead to a randomly initialized RNG.
 	*/
 	PlaneWaveTurbulence(const TurbulenceSpectrum &spectrum, int Nm = 64,
-	                    int seed = 0);
+	                    int seed = 0, std::string turbType = "3D");
 
 	/**
 	   Evaluates the field at the given position.
@@ -152,17 +151,6 @@ class PlaneWaveTurbulence : public TurbulentField {
 	   Theoretical runtime is O(Nm), where Nm is the number of wavemodes.
 	*/
 	Vector3d getField(const Vector3d &pos) const;
-
-
-	/** Change the turbulence type. Check if this routine is
-		contained in the enum turbulenceType and thus supported by CRPropa.*/
-	void setTurbulenceType(turbulenceType turbType) {
-		if (turbType == THREE_D || turbType == TWO_D || turbType == SLAB_1D) {
-			this->turbType = turbType;
-		} else {
-			throw std::runtime_error("TurbulenceType: unknown turbulence type");
-		}
-	}
 };
 
 /** @} */
