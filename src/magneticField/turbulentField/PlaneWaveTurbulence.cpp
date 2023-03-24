@@ -142,10 +142,18 @@ PlaneWaveTurbulence::PlaneWaveTurbulence(const TurbulenceSpectrum &spectrum,
 		// the return value of randVector(); however, TD13 then reuse
 		// these values to generate a random vector perpendicular to kappa.
 		double phi = random.randUniform(-M_PI, M_PI);
-		double costheta = random.randUniform(-1., 1.);
+		double costheta = 0.0;
+		if (turbType == THREE_D) {
+			costheta = random.randUniform(-1., 1.);
+		} else if (turbType == SLAB_1D) {
+			costheta = 1.0;
+		} 
 		double sintheta = sqrt(1 - costheta * costheta);
 
-		double alpha = random.randUniform(0, 2 * M_PI);
+		double alpha = 0.0;
+		if (turbType != SLAB_1D) {
+			alpha = random.randUniform(0, 2 * M_PI);
+		}
 		double beta = random.randUniform(0, 2 * M_PI);
 
 		Vector3d kappa =
