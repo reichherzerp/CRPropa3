@@ -6,6 +6,16 @@
 #include <vector>
 
 namespace crpropa {
+
+/** If set to THREE_D, use isotropic 3D turbulence (standard)
+If set to TWO_D, use isotropic 2D turbulence
+If set to SLAB_1D, use slab turbulence */
+enum turbulenceType {
+  THREE_D = 0,
+  TWO_D,
+  SLAB_1D
+};
+
 /**
  * \addtogroup MagneticFields
  * @{
@@ -118,6 +128,8 @@ class PlaneWaveTurbulence : public TurbulentField {
 	static const int ikkappa2 = 5;
 	static const int ibeta = 6;
 	static const int itotal = 7;
+	turbulenceType turbType; /**< Type of turbulence */
+
 
   public:
 	/**
@@ -140,6 +152,17 @@ class PlaneWaveTurbulence : public TurbulentField {
 	   Theoretical runtime is O(Nm), where Nm is the number of wavemodes.
 	*/
 	Vector3d getField(const Vector3d &pos) const;
+
+
+	/** Change the turbulence type. Check if this routine is
+		contained in the enum turbulenceType and thus supported by CRPropa.*/
+	void setTurbulenceType(turbulenceType turbType) {
+		if (turbType == THREE_D || turbType == TWO_D || turbType == SLAB_1D) {
+			this->turbType = turbType;
+		} else {
+			throw std::runtime_error("TurbulenceType: unknown turbulence type");
+		}
+	}
 };
 
 /** @} */
