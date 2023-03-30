@@ -468,7 +468,7 @@ using namespace crpropa;   // for usage of namespace in header files, necessary
 %include "crpropa/module/SimplePropagation.h"
 %include "crpropa/module/PropagationCK.h"
 %include "crpropa/module/PropagationBP.h"
-%include "crpropa/module/PropagationRS.h"
+%include "crpropa/module/Scatter.h"
 
 %ignore crpropa::Output::enableProperty(const std::string &property, const Variant& defaultValue, const std::string &comment = "");
 %extend crpropa::Output{
