@@ -30,10 +30,9 @@ private:
 
 public:
 	/** Default constructor for the Boris push. It is constructed with a fixed step size.
-	 * @param field
 	 * @param scatterRate
 	 */
-	Scatter(ref_ptr<MagneticField> field = NULL, double scatterRate = 1);
+	Scatter(double scatterRate = 1);
 
 	/** Propagates the particle. Is called once per iteration.
 	 * @param candidate	 The Candidate is a passive object, that holds the information about the state of the cosmic ray and the simulation itself. */

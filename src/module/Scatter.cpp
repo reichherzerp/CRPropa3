@@ -55,32 +55,22 @@ namespace crpropa {
 		return Y(pos, dir);
 	}*/
 
-	Scatter::Scatter(ref_ptr<MagneticField> field, double scatterRate) {
+	Scatter::Scatter(double scatterRate) {
 		setScatterRate(scatterRate);
 	}
 
-	void Scatter::process(Candidate *candidate) const {
+	void Scatter::process(Candidate *c) const {
 
-		Vector3d posPrevious = candidate->current.getPosition();
-
-		// save the new previous particle state
-		ParticleState &current = candidate->current;
-		candidate->previous = current;
-
-		Vector3d pos = current.getPosition();
-		Vector3d dir = current.getDirection();
-		double step = pos.getDistanceTo(posPrevious);
-
-		double deltaPhi = sqrt(2 * step * scatterRate / c_light);
-			
+		double step = c->getCurrentStep();
+		Vector3d dir = c->current.getDirection();
+		
+		double deltaPhi = sqrt(2 * step * scatterRate / c_light);	
 		Vector3d rv = crpropa::Random::instance().randVector();
 		Vector3d rotationAxis = dir.cross(rv);
-
 		dir = dir.getRotated(rotationAxis, deltaPhi);
-		pos += dir * step;
-
-		current.setPosition(pos);
-		current.setDirection(dir);
+		
+		c->current.setDirection(dir);
+		c->setNextStep(step);
 	} 
 
 	void Scatter::setScatterRate(double sRate) {
