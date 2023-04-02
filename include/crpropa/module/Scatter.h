@@ -27,19 +27,23 @@ class Scatter: public Module {
 
 private:
 	double scatterRate;
+	double scatterRateExternal;
+	double expansionFactor;
+	double expansionStart;
 
 public:
-	/** Default constructor for the Boris push. It is constructed with a fixed step size.
+	/** Default constructor
 	 * @param scatterRate
 	 */
-	Scatter(double scatterRate = 1);
+	Scatter(double scatterRate = 1, double scatterRateExternal = 0, double expansionFactor = 1, double expansionStart = 0);
 
 	/** Propagates the particle. Is called once per iteration.
 	 * @param candidate	 The Candidate is a passive object, that holds the information about the state of the cosmic ray and the simulation itself. */
 	void process(Candidate *candidate) const;
 
 	/** Set functions for the parameters of the class Scatter */
-	void setScatterRate(double sRate);
+	void setScatterRate(double sRate, double sRateExternal);
+	void setExpansion(double expFactor, double expStart);
 
 	/** Get functions for the parameters of the class Scatter, similar to the set functions */
 	std::string getDescription() const;
