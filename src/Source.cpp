@@ -749,6 +749,28 @@ void SourceIsotropicEmission::setDescription() {
 }
 
 // ----------------------------------------------------------------------------
+SourceDelayedEmission::SourceDelayedEmission(double duration, int nrEmissionSteps) {
+	setParameters(duration, nrEmissionSteps);
+	setDescription();
+}
+
+void SourceDelayedEmission::prepareCandidate(Candidate &candidate) const {
+	// Create a random number generator object
+    Random &random = Random::instance();
+	candidate.setTrajectoryLength(random.randInt(nrEmissionSteps) * duration);
+}
+
+void SourceDelayedEmission::setParameters(double dur, int nrEmSteps) {
+	nrEmissionSteps = nrEmSteps;
+	duration = dur;
+	return;
+}
+
+void SourceDelayedEmission::setDescription() {
+	description = "SourceDelayedEmission: deactivate particles initially\n";
+}
+
+// ----------------------------------------------------------------------------
 SourceDirectedEmission::SourceDirectedEmission(Vector3d mu, double kappa): mu(mu), kappa(kappa) {
 	if (kappa <= 0)
 		throw std::runtime_error("The concentration parameter kappa should be larger than 0.");

@@ -530,6 +530,22 @@ public:
 	void setDescription();
 };
 
+/**
+ @class SourceDelayedEmission
+ @brief Delayed emission from a source, all particles are deactivated initially
+ */
+class SourceDelayedEmission: public SourceFeature {
+	double duration;
+	int nrEmissionSteps;
+public:
+	/** Constructor
+	 */
+	SourceDelayedEmission(double duration, int nrEmissionSteps);
+	void prepareCandidate(Candidate &candidate) const;
+	void setParameters(double duration, int nrEmissionSteps);
+	void setDescription();
+};
+
 
 /**
  @class SourceDirectedEmission
