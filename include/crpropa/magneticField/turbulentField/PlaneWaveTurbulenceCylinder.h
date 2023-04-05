@@ -106,6 +106,7 @@ class PlaneWaveTurbulenceCylinder : public TurbulentField {
     double delta;
     double R;
     double decayFactor;
+    std::string turbType;
 
 	// data for FAST_WAVES
 	int avx_Nm;
@@ -125,6 +126,7 @@ class PlaneWaveTurbulenceCylinder : public TurbulentField {
 	static const int ikkappa2 = 5;
 	static const int ibeta = 6;
 	static const int itotal = 7;
+    
 
 
   public:

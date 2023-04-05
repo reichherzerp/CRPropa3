@@ -76,7 +76,7 @@ double hsum_double_avx(__m256d v) {
 #endif // defined(ENABLE_FAST_WAVES)
 
 PlaneWaveTurbulenceCylinder::PlaneWaveTurbulenceCylinder(const TurbulenceSpectrum &spectrum,
-                                         int Nm, int seed, std::string turbType, const Vector3d c, double r, double d, double dFactor)
+                                         int Nm, int seed, std::string tType, const Vector3d c, double r, double d, double dFactor)
     : TurbulentField(spectrum), Nm(Nm) {
 
 #ifdef ENABLE_FAST_WAVES
@@ -113,6 +113,8 @@ PlaneWaveTurbulenceCylinder::PlaneWaveTurbulenceCylinder(const TurbulenceSpectru
     center = c;
     delta = d;
     decayFactor = dFactor;
+    turbType = tType;
+
 
 	double delta = log10(kmax / kmin);
 	for (int i = 0; i < Nm; i++) {
@@ -132,7 +134,7 @@ PlaneWaveTurbulenceCylinder::PlaneWaveTurbulenceCylinder(const TurbulenceSpectru
 	// non-normalized Ak^2). Normalization happens in a second loop,
 	// once the total is known.
 	double Ak2_sum = 0; // sum of Ak^2 over all k
-    std::cout << turbType << std::endl;
+    std::cout << tType << std::endl;
 	for (int i = 0; i < Nm; i++) {
 		double k = this->k[i];
 		double kHat = k * spectrum.getLbendover();
@@ -148,15 +150,17 @@ PlaneWaveTurbulenceCylinder::PlaneWaveTurbulenceCylinder(const TurbulenceSpectru
 		// these values to generate a random vector perpendicular to kappa.
 		double phi = random.randUniform(-M_PI, M_PI);
 		double costheta = 0.0;
-		if (turbType == "3D") {
+		if (tType == "3D") {
 			costheta = random.randUniform(-1., 1.);
-		} else if (turbType == "slab") {
+		} else if (tType == "slab") {
 			costheta = 1.0;
+		} else if (tType == "cylindrical") {
+			costheta = 0.5      ;
 		} 
 		double sintheta = sqrt(1 - costheta * costheta);
 
 		double alpha = 0.0;
-		if (turbType != "slab") {
+		if (tType != "slab") {
 			alpha = random.randUniform(0, 2 * M_PI);
 		}
 		double beta = random.randUniform(0, 2 * M_PI);
@@ -170,12 +174,16 @@ PlaneWaveTurbulenceCylinder::PlaneWaveTurbulenceCylinder(const TurbulenceSpectru
 		// to the paper.) The reason for this discrepancy is that this code
 		// used to be based on the original GJ99 paper, which provided only a
 		// xi vector, and this xi happens to be almost the same as TD13's psi.
-		Vector3d xi =
-		    Vector3d(costheta * cos(phi) * cos(alpha) + sin(phi) * sin(alpha),
+        if (tType == "cylindrical") {
+			Vector3d xi = Vector3d(-sin(phi), cos(phi), 0);
+            this->xi[i] = xi;
+		} else {
+            Vector3d xi = Vector3d(costheta * cos(phi) * cos(alpha) + sin(phi) * sin(alpha),
 		             costheta * sin(phi) * cos(alpha) - cos(phi) * sin(alpha),
 		             -sintheta * cos(alpha));
-
-		this->xi[i] = xi;
+            this->xi[i] = xi;
+        }
+		
 		this->kappa[i] = kappa;
 		this->phi[i] = phi;
 		this->costheta[i] = costheta;
@@ -247,8 +255,12 @@ Vector3d PlaneWaveTurbulenceCylinder::getField(const Vector3d &pos) const {
 
     
     if (dist > R) {
-        double transition = 1 / (1 + std::exp(-(dist - R) / delta));
-        smoothing_factor = (1 - transition) * std::exp(-(dist - R) / decayFactor);
+        if (turbType == "cylindrical") {
+            return Vector3d(0.);
+        } else {
+            double transition = 1 / (1 + std::exp(-(dist - R) / delta));
+            smoothing_factor = (1 - transition) * std::exp(-(dist - R) / decayFactor);
+        }
     }
 
     
@@ -259,6 +271,50 @@ Vector3d PlaneWaveTurbulenceCylinder::getField(const Vector3d &pos) const {
         double z_ = pos.dot(kappa[i]);
         B += xi[i] * Ak[i] * cos(k[i] * z_ + beta[i]);
     }
+    /*if (turbType == "cylindrical") {
+        // Compute the vector from the center to the position (pos)
+        Vector3d center_to_pos = posPlane - center;
+
+        // Rotate the vector 90 degrees counter-clockwise in the x-y plane
+        Vector3d rotation_axis(0, 0, 1);
+        double angle = M_PI / 2.0;
+        Vector3d rotated_vector = center_to_pos.getRotated(rotation_axis, angle);
+
+        // Set the rotated vector's z-component to 0
+        rotated_vector.z = 0;
+
+        // Scale the rotated vector by the current magnitude of B
+        double B_magnitude = B.getR();
+        B = rotated_vector * B_magnitude / rotated_vector.getR();
+    }*/
+    if (turbType == "cylindrical") {
+        // Compute the vector from the center to the position (pos)
+        Vector3d center_to_pos = posPlane - center;
+
+        // Calculate the potential field A_z
+        double A_z = 0.0;
+        for (int i = 0; i < Nm; i++) {
+            double z_ = pos.dot(kappa[i]);
+            A_z += Ak[i] * cos(k[i] * z_ + beta[i]);
+        }
+
+        // Compute the partial derivatives of A_z with respect to x and y
+        double dA_z_dx = 0.0;
+        double dA_z_dy = 0.0;
+        for (int i = 0; i < Nm; i++) {
+            double z_ = pos.dot(kappa[i]);
+            double cos_term = -Ak[i] * k[i] * sin(k[i] * z_ + beta[i]);
+            dA_z_dx += cos_term * kappa[i].x;
+            dA_z_dy += cos_term * kappa[i].y;
+        }
+
+        // Set the magnetic field components Bx and By
+        B.x = dA_z_dy;
+        B.y = -dA_z_dx;
+    }
+
+
+
     return smoothing_factor * B;
 
 #else  // ENABLE_FAST_WAVES

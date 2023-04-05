@@ -7,14 +7,6 @@
 
 namespace crpropa {
 
-/** If set to THREE_D, use isotropic 3D turbulence (standard)
-If set to TWO_D, use isotropic 2D turbulence
-If set to SLAB_1D, use slab turbulence */
-enum turbulenceType {
-  THREE_D,
-  TWO_D,
-  SLAB_1D = 0
-};
 
 /**
  * \addtogroup MagneticFields
