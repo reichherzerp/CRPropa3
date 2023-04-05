@@ -127,6 +127,7 @@ PlaneWaveTurbulence::PlaneWaveTurbulence(const TurbulenceSpectrum &spectrum,
 	// For this loop, the Ak array actually contains Gk*delta_k (ie
 	// non-normalized Ak^2). Normalization happens in a second loop,
 	// once the total is known.
+	std::cout << turbType << std::endl;
 	double Ak2_sum = 0; // sum of Ak^2 over all k
 	for (int i = 0; i < Nm; i++) {
 		double k = this->k[i];
@@ -143,7 +144,7 @@ PlaneWaveTurbulence::PlaneWaveTurbulence(const TurbulenceSpectrum &spectrum,
 		// these values to generate a random vector perpendicular to kappa.
 		double phi = random.randUniform(-M_PI, M_PI);
 		double costheta = 0.0;
-		std::cout << turbType << std::endl;
+		
 		if (turbType == "3D") {
 			costheta = random.randUniform(-1., 1.);
 		} else if (turbType == "slab") {
