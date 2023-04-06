@@ -107,6 +107,8 @@ class PlaneWaveTurbulenceCylinder : public TurbulentField {
     double R;
     double decayFactor;
     std::string turbType;
+    double length; 
+    bool constant;
 
 	// data for FAST_WAVES
 	int avx_Nm;
@@ -142,7 +144,8 @@ class PlaneWaveTurbulenceCylinder : public TurbulentField {
 	   seed of 0 will lead to a randomly initialized RNG.
 	*/
 	PlaneWaveTurbulenceCylinder(const TurbulenceSpectrum &spectrum, int Nm = 64,
-	                    int seed = 0, std::string turbType = "3D", const Vector3d center = Vector3d(), double R = 1, double delta = 1, double decayFactor=1);
+	                    int seed = 0, std::string turbType = "3D", const Vector3d center = Vector3d(), 
+                        double R = 1, double delta = 1, double decayFactor=1, double length = 0, bool constant = true);
 
 	/**
 	   Evaluates the field at the given position.

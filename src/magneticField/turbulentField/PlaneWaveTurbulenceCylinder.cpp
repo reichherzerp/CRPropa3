@@ -76,7 +76,7 @@ double hsum_double_avx(__m256d v) {
 #endif // defined(ENABLE_FAST_WAVES)
 
 PlaneWaveTurbulenceCylinder::PlaneWaveTurbulenceCylinder(const TurbulenceSpectrum &spectrum,
-                                         int Nm, int seed, std::string tType, const Vector3d c, double r, double d, double dFactor)
+                                         int Nm, int seed, std::string tType, const Vector3d c, double r, double d, double dFactor, double l, bool cons)
     : TurbulentField(spectrum), Nm(Nm) {
 
 #ifdef ENABLE_FAST_WAVES
@@ -114,6 +114,8 @@ PlaneWaveTurbulenceCylinder::PlaneWaveTurbulenceCylinder(const TurbulenceSpectru
     delta = d;
     decayFactor = dFactor;
     turbType = tType;
+    length = l;
+    constant = cons;
 
 
 	double delta = log10(kmax / kmin);
@@ -244,10 +246,19 @@ PlaneWaveTurbulenceCylinder::PlaneWaveTurbulenceCylinder(const TurbulenceSpectru
 
 Vector3d PlaneWaveTurbulenceCylinder::getField(const Vector3d &pos) const {
     Vector3d posPlane = Vector3d(pos.x, pos.y, 0);
+    double scaling_factor = 1.0;
+    if (length > 0.0 && pos.z > length) {
+        return Vector3d(0.0);
+    } else {
+        if (!constant && length > 0.0) {
+            scaling_factor = pos.z / length;
+        }
+    }
+
+    
     double dist = posPlane.getDistanceTo(center);
     double smoothing_factor = 1.0;
 
-    
     if (dist > R && turbType != "cylindrical") {
         double transition = 1 / (1 + std::exp(-(dist - R) / delta));
         smoothing_factor = (1 - transition) * std::exp(-(dist - R) / decayFactor);
@@ -261,18 +272,7 @@ Vector3d PlaneWaveTurbulenceCylinder::getField(const Vector3d &pos) const {
         double z_ = pos.dot(kappa[i]);
         B += xi[i] * Ak[i] * cos(k[i] * z_ + beta[i]);
     }
-    // if (turbType == "cylindrical") {
-    //     Vector3d center_to_pos = posPlane - center;
-    //     // https://en.wikipedia.org/wiki/Solenoidal_vector_field
-    //     // TODO: now too strong, correct for the brms
-    //     // Rotate the vector 90 degrees counter-clockwise in the x-y plane
-    //     Vector3d rotated_vector(-center_to_pos.y, center_to_pos.x, 0);
 
-    //     // Scale the rotated vector by the current magnitude of B
-    //     double B_magnitude = B.getR();
-    //     B.x = rotated_vector.x * B_magnitude.getR();
-    //     B.y = rotated_vector.y * B_magnitude.getR();
-    // }
     if (turbType == "cylindrical") {
         Vector3d center_to_pos = posPlane - center;
         double x = center_to_pos.x;
@@ -280,7 +280,7 @@ Vector3d PlaneWaveTurbulenceCylinder::getField(const Vector3d &pos) const {
         
         // solenoidal vector components
         double r = center_to_pos.getR(); // same as dist
-        double eps = 0.00001;
+        double eps = pow(10,-8);
         double a = 1.0;
         // v_x = (-y * k / (sqrt(x^2 + y^2) + eps)) * (1 - tanh((sqrt(x^2 + y^2) - R)/a))
         // v_y = (x * k / (sqrt(x^2 + y^2) + eps)) * (1 - tanh((sqrt(x^2 + y^2) - R)/a))
@@ -294,8 +294,7 @@ Vector3d PlaneWaveTurbulenceCylinder::getField(const Vector3d &pos) const {
         B.y = b_solenoidal.y * B_magnitude;
     }
 
-
-    return smoothing_factor * B;
+    return smoothing_factor * B * scaling_factor;
 
 #else  // ENABLE_FAST_WAVES
 
@@ -493,8 +492,9 @@ Vector3d PlaneWaveTurbulenceCylinder::getField(const Vector3d &pos) const {
 		acc2 = _mm256_add_pd(_mm256_mul_pd(u, Axi2), acc2);
 	}
 
-	return Vector3d(hsum_double_avx(acc0) * smoothing_factor, hsum_double_avx(acc1) * smoothing_factor,
-                    hsum_double_avx(acc2) * smoothing_factor);
+	return Vector3d(hsum_double_avx(acc0) * smoothing_factor * scaling_factor, 
+                    hsum_double_avx(acc1) * smoothing_factor * scaling_factor,
+                    hsum_double_avx(acc2) * smoothing_factor * scaling_factor);
 #endif // ENABLE_FAST_WAVES
 }
 
