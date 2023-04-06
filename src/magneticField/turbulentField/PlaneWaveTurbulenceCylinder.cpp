@@ -248,13 +248,9 @@ Vector3d PlaneWaveTurbulenceCylinder::getField(const Vector3d &pos) const {
     double smoothing_factor = 1.0;
 
     
-    if (dist > R) {
-        if (turbType == "cylindrical") {
-            return Vector3d(0.);
-        } else {
-            double transition = 1 / (1 + std::exp(-(dist - R) / delta));
-            smoothing_factor = (1 - transition) * std::exp(-(dist - R) / decayFactor);
-        }
+    if (dist > R && turbType != "cylindrical") {
+        double transition = 1 / (1 + std::exp(-(dist - R) / delta));
+        smoothing_factor = (1 - transition) * std::exp(-(dist - R) / decayFactor);
     }
 
     
@@ -265,16 +261,37 @@ Vector3d PlaneWaveTurbulenceCylinder::getField(const Vector3d &pos) const {
         double z_ = pos.dot(kappa[i]);
         B += xi[i] * Ak[i] * cos(k[i] * z_ + beta[i]);
     }
+    // if (turbType == "cylindrical") {
+    //     Vector3d center_to_pos = posPlane - center;
+    //     // https://en.wikipedia.org/wiki/Solenoidal_vector_field
+    //     // TODO: now too strong, correct for the brms
+    //     // Rotate the vector 90 degrees counter-clockwise in the x-y plane
+    //     Vector3d rotated_vector(-center_to_pos.y, center_to_pos.x, 0);
+
+    //     // Scale the rotated vector by the current magnitude of B
+    //     double B_magnitude = B.getR();
+    //     B.x = rotated_vector.x * B_magnitude.getR();
+    //     B.y = rotated_vector.y * B_magnitude.getR();
+    // }
     if (turbType == "cylindrical") {
         Vector3d center_to_pos = posPlane - center;
-        // https://en.wikipedia.org/wiki/Solenoidal_vector_field
-        // TODO: now too strong, correct for the brms
-        // Rotate the vector 90 degrees counter-clockwise in the x-y plane
-        Vector3d rotated_vector(-center_to_pos.y, center_to_pos.x, 0);
+        double x = center_to_pos.x;
+        double y = center_to_pos.y;
+        
+        // solenoidal vector components
+        double r = center_to_pos.getR(); // same as dist
+        double eps = 0.00001;
+        double a = 1.0;
+        // v_x = (-y * k / (sqrt(x^2 + y^2) + eps)) * (1 - tanh((sqrt(x^2 + y^2) - R)/a))
+        // v_y = (x * k / (sqrt(x^2 + y^2) + eps)) * (1 - tanh((sqrt(x^2 + y^2) - R)/a))
+        double v_x = (-y / (r + eps)) * (1 - tanh((r - R)/a));
+        double v_y = (x / (r + eps)) * (1 - tanh((r - R)/a));
+        Vector3d b_solenoidal(v_x, v_y, 0);
 
         // Scale the rotated vector by the current magnitude of B
-        B.x = rotated_vector.x * B.getR();
-        B.y = rotated_vector.y * B.getR();
+        double B_magnitude = B.getR();
+        B.x = b_solenoidal.x * B_magnitude;
+        B.y = b_solenoidal.y * B_magnitude;
     }
 
 
