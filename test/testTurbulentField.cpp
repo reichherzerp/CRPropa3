@@ -1,6 +1,7 @@
 #include <stdexcept>
 
 #include "crpropa/Grid.h"
+#include "crpropa/Random.h"
 #include "crpropa/Units.h"
 #include "crpropa/Common.h"
 #include "crpropa/GridTools.h"
@@ -10,6 +11,7 @@
 #include "crpropa/magneticField/turbulentField/SimpleGridTurbulence.h"
 
 #include "gtest/gtest.h"
+#include <numeric>
 
 using namespace crpropa;
 
@@ -28,6 +30,41 @@ TEST(testTurbulenceSpectrum, constructor) {
 	EXPECT_DOUBLE_EQ(spectrum.getLbendover(), bendOver); //default
 	EXPECT_DOUBLE_EQ(spectrum.getSindex(), sIndex); //default
 	EXPECT_DOUBLE_EQ(spectrum.getQindex(), qIndex); //default
+}
+
+TEST(testTurbulenceSpectrum, PW) {
+    const double r = 1e-5 * pc;
+    const int n = static_cast<int>(std::pow(10, 4));
+    std::vector<double> sq_diffs(n);
+
+    const double l_min = 1e-7 * pc;
+    const double l_max = 1e5 * pc;
+    const double brms = 1 * muG;
+    const int n_wavemodes = 1024;
+
+    auto spectrum = SimpleTurbulenceSpectrum(brms, l_min, l_max);
+    auto turbulence = PlaneWaveTurbulence(spectrum, n_wavemodes, 1);
+
+    Random &R = Random::instance();
+    for (int i = 0; i < n; i++) {
+        Vector3d randomDirection = R.randVector();
+        Vector3d offset = randomDirection * l_max;
+        Vector3d displacement = randomDirection * r;
+
+        Vector3d b0 = turbulence.getField(offset);
+        Vector3d b = turbulence.getField(offset + displacement);
+        
+        double diff = (b0 - b).getR();
+        double sq_diff = diff * diff;
+        sq_diffs[i] = sq_diff;
+    }
+
+    std::transform(sq_diffs.begin(), sq_diffs.end(), sq_diffs.begin(), [brms](double& d) { return d / (brms * brms); });
+    double mean_s2_diff = std::accumulate(sq_diffs.begin(), sq_diffs.end(), 0.0) / sq_diffs.size();
+    
+    double theory_s2_diff = std::pow((r / l_max * 5), (2.0 / 3.0)) * 2;
+    std::cout << "Mean of squared differences: " << mean_s2_diff << std::endl;
+    std::cout << "Theory of squared differences: " << theory_s2_diff << std::endl;
 }
 
 TEST(testTurbulenceSpectrum, correlationLength) {
