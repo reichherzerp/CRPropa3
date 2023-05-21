@@ -43,10 +43,11 @@
 #include "crpropa/GridTools.h"
 #include "crpropa/Random.h"
 #include "crpropa/Units.h"
-
 #include "kiss/logger.h"
 
+
 #include <iostream>
+#include <memory>
 
 #if defined(FAST_WAVES)
 #if defined(__SSE__) && defined(__SSE2__) && defined(__SSE3__) && defined(__SSE4_1__) && defined(__SSE4_2__) && defined(__AVX__)
