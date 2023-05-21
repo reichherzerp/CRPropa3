@@ -241,3 +241,12 @@ Check that all paths are set correctly with the following command in the build f
    ccmake .. 
   ```
 and configure and generate again after changes.
+
+
+It should look like:
+```sh
+PYTHON_EXECUTABLE                /opt/homebrew/Cellar/python@3.10/3.10.11/Frameworks/Python.framework/Versions/3.10/bin/python3.10                                 
+PYTHON_H_FOUND                   /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Headers/Python.h                                         
+PYTHON_INCLUDE_DIR               /opt/homebrew/Cellar/python@3.10/3.10.11/Frameworks/Python.framework/Versions/3.10/include/python3.10                             
+PYTHON_LIBRARY                   /opt/homebrew/Cellar/python@3.10/3.10.11/Frameworks/Python.framework/Versions/3.10/lib/libpython3.10.dylib
+```
