@@ -1,8 +1,10 @@
 #include "crpropa/module/PropagationBP.h"
+#include "crpropa/Random.h"
 
 #include <sstream>
 #include <stdexcept>
 #include <vector>
+#include <random>
 
 namespace crpropa {
 	void PropagationBP::tryStep(const Y &y, Y &out, Y &error, double h,
@@ -46,6 +48,18 @@ namespace crpropa {
 		setTolerance(0.42);
 		setMaximumStep(fixedStep);
 		setMinimumStep(fixedStep);
+	}
+
+
+	// with a fixed step size and additional MC scattering
+	PropagationBP::PropagationBP(int test, ref_ptr<MagneticField> field, double fixedStep, double scatterRate, double minB) :
+			minStep(0) {
+		setField(field);
+		setTolerance(0.42);
+		setMaximumStep(fixedStep);
+		setMinimumStep(fixedStep);
+		setScatterRate(scatterRate);
+		setMinB(minB);
 	}
 
 
@@ -117,8 +131,26 @@ namespace crpropa {
 			}
 		}
 
+		Vector3d dir = yOut.u.getUnitVector();
+
+		// MC scatter only when field strength is above threshold
+		Vector3d B = getFieldAtPosition(yOut.x, z);
+		if (B.getR() >= minB) {
+			
+			// Initialize random number generator
+			int seed = 1;
+			std::mt19937 gen(seed != 0 ? seed : std::time(nullptr));
+			std::normal_distribution<double> gaussianDist(0.0, 1.0);
+
+			double deltaPhi = sqrt(step * scatterRate / c_light) * gaussianDist(gen);
+			Vector3d rv = Random::instance().randVector();
+			
+			Vector3d rotationAxis = dir.cross(rv);
+			dir = dir.getRotated(rotationAxis, deltaPhi);
+		}
+
 		current.setPosition(yOut.x);
-		current.setDirection(yOut.u.getUnitVector());
+		current.setDirection(dir);
 		candidate->setCurrentStep(step);
 		candidate->setNextStep(newStep);
 	}
@@ -180,6 +212,16 @@ namespace crpropa {
 		if (max < minStep)
 			throw std::runtime_error("PropagationBP: maxStep < minStep");
 		maxStep = max;
+	}
+
+
+	void PropagationBP::setScatterRate(double sRate) {
+		scatterRate = sRate;
+	}
+
+
+	void PropagationBP::setMinB(double mB) {
+		minB = mB;
 	}
 
 
