@@ -27,6 +27,7 @@ private:
 	Vector3d direction; ///< unit vector of velocity or momentum
 	double pmass; ///< particle rest mass
 	double charge; ///< particle charge
+	double nrScatter; ///< nr MC scatters
 
 public:
 	/** Constructor for a particle state.
@@ -37,7 +38,8 @@ public:
 	 */
 	ParticleState(int id = 0, double energy = 0,
 			Vector3d position = Vector3d(0, 0, 0),
-			Vector3d direction = Vector3d(-1, 0, 0));
+			Vector3d direction = Vector3d(-1, 0, 0),
+			int nrScatter = 0);
 
 	/** Set particle position.
 	 In simulations including cosmological effects, the position is given in comoving coordinates.
@@ -70,6 +72,11 @@ public:
 	 @returns Rigidity of the particle [in Volts]
 	 */
 	double getRigidity() const;
+
+	void setNrScatter(const int nrScatter);
+	/** Get info if scattered
+	 */
+	const int &getNrScatter() const;
 
 	/** Set particle ID.
 	 This follows the PDG numbering scheme:

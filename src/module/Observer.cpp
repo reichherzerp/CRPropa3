@@ -323,6 +323,9 @@ void ObserverTimeEvolution::addTime(const double& t) {
 void ObserverTimeEvolution::addTimeRange(double min, double max, double numb, bool log) {
 	for (size_t i = 0; i < numb; i++) {
 		if (log == true) {
+			if (i == 0) {
+				addTime(0);
+			}
 			addTime(min * pow(max / min, i / (numb - 1.0)));
 		} else {
 			addTime(min + i * (max - min) / numb);

@@ -29,6 +29,7 @@ namespace crpropa {
  . E			 CurrentEnergyColumn
  . X/Y/Z		 CurrentPositionColumn
  . Px/Py/Pz		 CurrentDirectionColumn
+ . Nsc		 CurrentNrScatterColumn
  . SN0			 SourceSerialNumberColumn
  . ID0			 SourceIdColumn
  . E0			 SourceEnergyColumn
@@ -78,6 +79,7 @@ public:
 		CurrentEnergyColumn,
 		CurrentPositionColumn,
 		CurrentDirectionColumn,
+		CurrentNrScatterColumn,
 		SourceIdColumn,
 		SourceEnergyColumn,
 		SourcePositionColumn,

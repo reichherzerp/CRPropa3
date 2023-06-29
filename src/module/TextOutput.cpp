@@ -68,6 +68,8 @@ void TextOutput::printHeader() const {
 		*out << "\tX\tY\tZ";
 	if (fields.test(CurrentDirectionColumn) && not oneDimensional)
 		*out << "\tPx\tPy\tPz";
+	if (fields.test(CurrentNrScatterColumn) && not oneDimensional)
+		*out << "\tNsc";
 	if (fields.test(SerialNumberColumn))
 		*out << "\tSN0";
 	if (fields.test(SourceIdColumn))
@@ -123,6 +125,10 @@ void TextOutput::printHeader() const {
 			|| fields.test(CreatedDirectionColumn)
 			|| fields.test(SourceDirectionColumn))
 		*out << "# Px/P0x/P1x... Heading (unit vector of momentum)\n";
+	if (fields.test(CurrentNrScatterColumn)
+			|| fields.test(CurrentNrScatterColumn)
+			|| fields.test(CurrentNrScatterColumn))
+		*out << "# Sx/S0x/S1x... Position [" << lengthScale / Mpc << " Mpc]\n";
 	if (fields.test(WeightColumn))
 		*out << "# W             Weights" << " \n";
 	if (fields.test(CandidateTagColumn)) {
@@ -186,7 +192,7 @@ void TextOutput::process(Candidate *c) const {
 					c->current.getPosition().x / lengthScale);
 		} else {
 			const Vector3d pos = c->current.getPosition() / lengthScale;
-			p += std::sprintf(buffer + p, "%8.5E\t%8.5E\t%8.5E\t", pos.x, pos.y,
+			p += std::sprintf(buffer + p, "%8.15E\t%8.15E\t%8.15E\t", pos.x, pos.y,
 					pos.z);
 		}
 	}
@@ -197,6 +203,9 @@ void TextOutput::process(Candidate *c) const {
 					pos.z);
 		}
 	}
+	if (fields.test(CurrentNrScatterColumn))
+		p += std::sprintf(buffer + p, "%10i\t", c->current.getNrScatter());
+	
 
 	if (fields.test(SerialNumberColumn))
 		p += std::sprintf(buffer + p, "%10lu\t", c->getSourceSerialNumber());

@@ -43,9 +43,9 @@
 #include "crpropa/GridTools.h"
 #include "crpropa/Random.h"
 #include "crpropa/Units.h"
-
 #include "kiss/logger.h"
 
+#include <memory>
 #include <iostream>
 
 #if defined(FAST_WAVES)
