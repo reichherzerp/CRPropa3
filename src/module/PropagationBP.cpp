@@ -1,28 +1,24 @@
 #include "crpropa/module/PropagationBP.h"
+#include "crpropa/Random.h"
 
 #include <sstream>
 #include <stdexcept>
 #include <vector>
+#include <random>
 
 namespace crpropa {
 	void PropagationBP::tryStep(const Y &y, Y &out, Y &error, double h,
 			ParticleState &particle, double z, double q, double m) const {
-		out = dY(y.x, y.u, h, z, q, m);  // 1 step with h
-
-		Y outHelp = dY(y.x, y.u, h/2, z, q, m);  // 2 steps with h/2
-		Y outCompare = dY(outHelp.x, outHelp.u, h/2, z, q, m);
-
-		error = errorEstimation(out.x , outCompare.x , h);
 	}
 
 
 	PropagationBP::Y PropagationBP::dY(Vector3d pos, Vector3d dir, double step,
-			double z, double q, double m) const {
+			double z, double q, double m, Vector3d &B) const {
 		// half leap frog step in the position
 		pos += dir * step / 2.;
 
 		// get B field at particle position
-		Vector3d B = getFieldAtPosition(pos, z);
+		B = getFieldAtPosition(pos, z);
 
 		// Boris help vectors
 		Vector3d t = B * q / 2 / m * step / c_light;
@@ -49,6 +45,18 @@ namespace crpropa {
 	}
 
 
+	// with a fixed step size and additional MC scattering
+	PropagationBP::PropagationBP(int test, ref_ptr<MagneticField> field, double fixedStep, double scatterRate, double minB) :
+			minStep(0) {
+		setField(field);
+		setTolerance(0.42);
+		setMaximumStep(fixedStep);
+		setMinimumStep(fixedStep);
+		setScatterRate(scatterRate);
+		setMinB(minB);
+	}
+
+
 	// with adaptive step size
 	PropagationBP::PropagationBP(ref_ptr<MagneticField> field, double tolerance, double minStep, double maxStep) :
 			minStep(0) {
@@ -69,6 +77,7 @@ namespace crpropa {
 		// calculate charge of particle
 		double q = current.getCharge();
 		double step = maxStep;
+		Vector3d B;
 
 		// rectilinear propagation for neutral particles
 		if (q == 0) {
@@ -87,38 +96,30 @@ namespace crpropa {
 		// if minStep is the same as maxStep the adaptive algorithm with its error
 		// estimation is not needed and the computation time can be saved:
 		if (minStep == maxStep){
-			yOut = dY(yIn.x, yIn.u, step, z, q, m);
-		} else {
-			step = clip(candidate->getNextStep(), minStep, maxStep);
-			newStep = step;
-			double r = 42;  // arbitrary value
+			yOut = dY(yIn.x, yIn.u, step, z, q, m, B);
+		} 
 
-			// try performing step until the target error (tolerance) or the minimum/maximum step size has been reached
-			while (true) {
-				tryStep(yIn, yOut, yErr, step, current, z, q, m);
-				r = yErr.u.getR() / tolerance;  // ratio of absolute direction error and tolerance
-				if (r > 1) {  // large direction error relative to tolerance, try to decrease step size
-					if (step == minStep)  // already minimum step size
-						break;
-					else {
-						newStep = step * 0.95 * pow(r, -0.2);
-						newStep = std::max(newStep, 0.1 * step); // limit step size decrease
-						newStep = std::max(newStep, minStep); // limit step size to minStep
-						step = newStep;
-					}
-				} else {  // small direction error relative to tolerance, try to increase step size
-					if (step != maxStep) {  // only update once if maximum step size yet not reached
-						newStep = step * 0.95 * pow(r, -0.2);
-						newStep = std::min(newStep, 5 * step); // limit step size increase
-						newStep = std::min(newStep, maxStep); // limit step size to maxStep
-					}
-					break;
-				}
-			}
+		Vector3d dir = yOut.u.getUnitVector();
+
+		// MC scatter only when field strength is above threshold
+		if (B.getR() >= minB) {
+			
+			// Initialize random number generator
+			int seed = 1;
+			std::mt19937 gen(seed != 0 ? seed : std::time(nullptr));
+			std::normal_distribution<double> gaussianDist(0.0, 1.0);
+
+			double deltaPhi = sqrt(step * scatterRate / c_light) * gaussianDist(gen);
+			Vector3d rv = Random::instance().randVector();
+			
+			Vector3d rotationAxis = dir.cross(rv);
+			dir = dir.getRotated(rotationAxis, deltaPhi);
+			
+			current.setNrScatter(current.getNrScatter()+1);
 		}
 
 		current.setPosition(yOut.x);
-		current.setDirection(yOut.u.getUnitVector());
+		current.setDirection(dir);
 		candidate->setCurrentStep(step);
 		candidate->setNextStep(newStep);
 	}
@@ -180,6 +181,16 @@ namespace crpropa {
 		if (max < minStep)
 			throw std::runtime_error("PropagationBP: maxStep < minStep");
 		maxStep = max;
+	}
+
+
+	void PropagationBP::setScatterRate(double sRate) {
+		scatterRate = sRate;
+	}
+
+
+	void PropagationBP::setMinB(double mB) {
+		minB = mB;
 	}
 
 

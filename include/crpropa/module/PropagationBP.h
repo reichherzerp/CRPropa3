@@ -57,6 +57,8 @@ private:
 	double tolerance; /** target relative error of the numerical integration */
 	double minStep; /** minimum step size of the propagation */
 	double maxStep; /** maximum step size of the propagation */
+	double scatterRate;
+	double minB;
 
 public:
 	/** Default constructor for the Boris push. It is constructed with a fixed step size.
@@ -64,6 +66,12 @@ public:
 	 * @param fixedStep 
 	 */
 	PropagationBP(ref_ptr<MagneticField> field = NULL, double fixedStep = 1. * kpc);
+
+	/** Constructor for the Boris push with additional MC scattering.
+	 * @param field
+	 * @param fixedStep 
+	 */
+	PropagationBP(int test, ref_ptr<MagneticField> field = NULL, double fixedStep = 1. * kpc, double scatterRate = 1.0, double minB = 0.0);
 
 	/** Constructor for the adaptive Boris push.
 	 * @param field
@@ -86,7 +94,7 @@ public:
 	 * @param m		current mass of the candidate
 	 * @return	  return the new calculated position and direction of the candidate 
 	 */
-	Y dY(Vector3d  pos, Vector3d  dir, double step, double z, double q, double m) const;
+	Y dY(Vector3d  pos, Vector3d  dir, double step, double z, double q, double m, Vector3d &B) const;
 
 	/** comparison of the position after one step with the position after two steps with step/2.
 	 * @param x1	position after one step of size step
@@ -133,6 +141,9 @@ public:
 	 * @param maxStep	   maxStep/c_light is the maximum integration time step 
 	 */
 	void setMaximumStep(double maxStep);
+	/** Set functions for the parameters of the class Scatter */
+	void setScatterRate(double sRate);
+	void setMinB(double minB);
 
 	/** Get functions for the parameters of the class PropagationBP, similar to the set functions */
 
