@@ -88,6 +88,11 @@ worthwhile effort afterwards.
     ```sh
     virtualenv $CRPROPA_DIR
     ```
+
+    on servers (hydra) maybe
+    ```sh
+    python3.6 -m venv $CRPROPA_DIR
+    ```
     if there is virtualenv available on the system.
 		If the virtualenv is not installed on a system, try to use your operating
 		system software repository to install it (usually the package is called
@@ -105,7 +110,7 @@ worthwhile effort afterwards.
     source $CRPROPA_DIR"/bin/activate"
     ```
 
-3. Check the dependencies and install at least mandatory ones (see [prerequisites](#prerequisites)). This can be done with package managers (see the [package list](#notes-for-specific-operating-systems) in different operating systems). If packages are installed from source, during the compilation the installation prefix should be specified:
+4. Check the dependencies and install at least mandatory ones (see [prerequisites](#prerequisites)). This can be done with package managers (see the [package list](#notes-for-specific-operating-systems) in different operating systems). If packages are installed from source, during the compilation the installation prefix should be specified:
     ```sh
     ./configure --prefix=$CRPROPA_DIR
     make
@@ -114,7 +119,7 @@ worthwhile effort afterwards.
 
     To install python dependencies and libraries use `pip`. Example: `pip install numpy`.
 
-4. Compile and install CRPropa (please note specific [insturctions for different operating systems](#notes-for-specific-operating-systems)).
+5. Compile and install CRPropa (please note specific [insturctions for different operating systems](#notes-for-specific-operating-systems)).
     ```sh
     cd $CRPROPA_DIR
     git clone https://github.com/CRPropa/CRPropa3.git
@@ -126,9 +131,9 @@ worthwhile effort afterwards.
     make install
     ```
 
-5. A set of unit tests can be run with ```make test```. 
+6. A set of unit tests can be run with ```make test```. 
 
-6. (optional) Check the installation.
+7. (optional) Check the installation.
     ```python
     python
     import crpropa
@@ -210,9 +215,9 @@ In case of CentOS/RHEL 7, the SWIG version is too old and has to be built from s
 Tested on version 12.5.1 with M1 pro where command line developer tools are installed. 
 Install Python3, and llvm from Homebrew, and specify the following paths to the Python and llvm directories in the Homebrew folder after step 3 of the above installation, e.g. (please use your exact versions):
   ```sh
-   export LLVM_DIR="/opt/homebrew/Cellar/llvm/16.0.1"
+   export LLVM_DIR="/opt/homebrew/Cellar/llvm/16.0.4"
    PYTHON_VERSION=3.10
-   LLVM_VERSION=16.0.1
+   LLVM_VERSION=16.0.4
    PYTHON_DIR=/opt/homebrew/Cellar/python@3.10/3.10.11/Frameworks/Python.framework/Versions/3.10
   ```
 and replace the command in step 4 of the installation routine
