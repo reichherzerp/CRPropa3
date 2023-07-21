@@ -215,10 +215,10 @@ In case of CentOS/RHEL 7, the SWIG version is too old and has to be built from s
 Tested on version 12.5.1 with M1 pro where command line developer tools are installed. 
 Install Python3, and llvm from Homebrew, and specify the following paths to the Python and llvm directories in the Homebrew folder after step 3 of the above installation, e.g. (please use your exact versions):
   ```sh
-   export LLVM_DIR="/opt/homebrew/Cellar/llvm/16.0.4"
+   export LLVM_DIR="/opt/homebrew/Cellar/llvm/16.0.6"
    PYTHON_VERSION=3.10
-   LLVM_VERSION=16.0.4
-   PYTHON_DIR=/opt/homebrew/Cellar/python@3.10/3.10.11/Frameworks/Python.framework/Versions/3.10
+   LLVM_VERSION=16.0.6
+   PYTHON_DIR=/opt/homebrew/Cellar/python@3.10/3.10.12_1/Frameworks/Python.framework/Versions/3.10
   ```
 and replace the command in step 4 of the installation routine
   ```sh
