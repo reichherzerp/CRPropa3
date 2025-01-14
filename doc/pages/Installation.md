@@ -4,7 +4,7 @@
 1. Install relevant packages
      ```sh
      brew update
-     brew install cmake gcc fftw gsl muparser hdf5
+     brew install python virtualenv hdf5 fftw cfitsio muparser libomp numpy swig llvm zlib
      ```
 
 ## Virtual Environment Setup
