@@ -18,8 +18,8 @@
 2. Verify Python in the virtual environment:
      ```sh
      which python
-     # Output should be: $(pwd)/$VENV/bin/python
      ```
+Output should be: $(pwd)/$VENV/bin/python
 ## Download CRPropa
 1. Clone the CRPropa repository into the virtual environment directory:
      ```sh
