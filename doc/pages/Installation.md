@@ -5,25 +5,25 @@
      ```sh
      brew update
      brew install cmake gcc fftw gsl muparser hdf5
-     pip install numpy
      ```
 
 ## Virtual Environment Setup
 1. Create and activate the virtual environment:
      ```sh
      export VENV=crpropa
-     python3 -m venv $(pwd)/venv/$VENV
-     source $(pwd)/venv/$VENV/bin/activate
+     python3 -m venv $(pwd)/$VENV
+     source $(pwd)/$VENV/bin/activate
+     pip install numpy
      ```
-3. Verify Python in the virtual environment:
+2. Verify Python in the virtual environment:
      ```sh
      which python
-     # Output should be: $(pwd)/venv/$VENV/bin/python
+     # Output should be: $(pwd)/$VENV/bin/python
      ```
 ## Download CRPropa
-Clone the CRPropa repository into the virtual environment directory:
+1. Clone the CRPropa repository into the virtual environment directory:
      ```sh
-     cd $(pwd)/venv/$VENV
+     cd $(pwd)/$VENV
      git clone https://github.com/CRPropa/CRPropa3.git
      cd CRPropa3
      ```
@@ -54,6 +54,6 @@ Clone the CRPropa repository into the virtual environment directory:
 ## Test installation
 1. Test the installation:
     ```sh
-    crpropa_32 % python -c "import crpropa; print(crpropa.pc)"
+    python -c "import crpropa; print(crpropa.pc)"
     ```
     
