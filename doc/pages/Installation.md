@@ -40,7 +40,8 @@ Clone the CRPropa repository into the virtual environment directory:
       -DPYTHON_EXECUTABLE=$(which python) \
       -DFFTW_ROOT=/opt/homebrew \
       -DGSL_ROOT_DIR=/opt/homebrew \
-      -DHEALPIX_ROOT=/opt/homebrew
+      -DHEALPIX_ROOT=/opt/homebrew \
+      -DENABLE_GALACTICMAGNETICLENS=FALSE
     ```
 3. Compile and install:
     ```sh
