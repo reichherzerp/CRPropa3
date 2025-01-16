@@ -34,6 +34,7 @@ namespace crpropa {
  . E0			 SourceEnergyColumn
  . X0/Y0/Z0		 SourcePositionColumn
  . P0x/P0y/P0z	 SourceDirectionColumn
+ . Bx/By/Bz	 	 CurrentBfieldColumn
  . SN1			 CreatedSerialNumberColumn
  . ID1			 CreatedIdColumn
  . E1			 CreatedEnergyColumn
@@ -78,6 +79,7 @@ public:
 		CurrentEnergyColumn,
 		CurrentPositionColumn,
 		CurrentDirectionColumn,
+		CurrentBfieldColumn,
 		SourceIdColumn,
 		SourceEnergyColumn,
 		SourcePositionColumn,

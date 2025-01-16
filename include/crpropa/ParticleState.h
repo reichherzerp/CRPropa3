@@ -23,10 +23,12 @@ class ParticleState {
 private:
 	int id; ///< particle ID (Particle Data Group numbering scheme)
 	double energy; ///< total energy
+	Vector3d bfield;
 	Vector3d position; ///< position vector in comoving coordinates
 	Vector3d direction; ///< unit vector of velocity or momentum
 	double pmass; ///< particle rest mass
 	double charge; ///< particle charge
+	
 
 public:
 	/** Constructor for a particle state.
@@ -34,11 +36,18 @@ public:
 	 @param energy		energy of the particle [in Joules]
 	 @param position	vector containing the coordinates of the particle [in meters]
 	 @param direction	vector containing the direction of motion of the particle
+	 @param bfield		vector containing the direction of the magnetic field
 	 */
 	ParticleState(int id = 0, double energy = 0,
 			Vector3d position = Vector3d(0, 0, 0),
-			Vector3d direction = Vector3d(-1, 0, 0));
+			Vector3d direction = Vector3d(-1, 0, 0),
+			Vector3d bfield = Vector3d(-1, 0, 0));
 
+	/** Set b field vector
+	 @param b vector containing the direction of motion of the particle
+	 */
+	void setBfield(const Vector3d &b);
+	const Vector3d &getBfield() const;
 	/** Set particle position.
 	 In simulations including cosmological effects, the position is given in comoving coordinates.
 	 @param pos		vector containing the coordinates of the particle [in meters]
@@ -57,6 +66,8 @@ public:
 	 @returns Normalized vector containing direction of motion of particle.
 	 */
 	const Vector3d &getDirection() const;
+	
+	
 
 	/** Set energy of particle.
 	 @param newEnergy	energy to be assigned to particle [in Joules]

@@ -11,12 +11,13 @@
 
 namespace crpropa {
 
-ParticleState::ParticleState(int id, double E, Vector3d pos, Vector3d dir): id(0), energy(0.), position(0.), direction(0.), pmass(0.), charge(0.)
+ParticleState::ParticleState(int id, double E, Vector3d pos, Vector3d dir, Vector3d b): id(0), energy(0.), position(0.), direction(0.), pmass(0.), charge(0.), bfield(0.)
 {
 	setId(id);
 	setEnergy(E);
 	setPosition(pos);
 	setDirection(dir);
+	setBfield(b);
 }
 
 void ParticleState::setPosition(const Vector3d &pos) {
@@ -25,6 +26,15 @@ void ParticleState::setPosition(const Vector3d &pos) {
 
 const Vector3d &ParticleState::getPosition() const {
 	return position;
+}
+
+
+void ParticleState::setBfield(const Vector3d &b) {
+	bfield = b;
+}
+
+const Vector3d &ParticleState::getBfield() const {
+	return bfield;
 }
 
 void ParticleState::setDirection(const Vector3d &dir) {

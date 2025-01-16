@@ -68,6 +68,8 @@ void TextOutput::printHeader() const {
 		*out << "\tX\tY\tZ";
 	if (fields.test(CurrentDirectionColumn) && not oneDimensional)
 		*out << "\tPx\tPy\tPz";
+	if (fields.test(CurrentBfieldColumn) && not oneDimensional)
+		*out << "\tBx\tBy\tBz";
 	if (fields.test(SerialNumberColumn))
 		*out << "\tSN0";
 	if (fields.test(SourceIdColumn))
@@ -123,6 +125,8 @@ void TextOutput::printHeader() const {
 			|| fields.test(CreatedDirectionColumn)
 			|| fields.test(SourceDirectionColumn))
 		*out << "# Px/P0x/P1x... Heading (unit vector of momentum)\n";
+	if (fields.test(CurrentBfieldColumn))
+		*out << "# Bx/B0x/B1x... Heading (bfield)\n";
 	if (fields.test(WeightColumn))
 		*out << "# W             Weights" << " \n";
 	if (fields.test(CandidateTagColumn)) {
@@ -189,6 +193,13 @@ void TextOutput::process(Candidate *c) const {
 			p += std::sprintf(buffer + p, "%8.5E\t%8.5E\t%8.5E\t", pos.x, pos.y,
 					pos.z);
 		}
+	}
+	if (fields.test(CurrentBfieldColumn)) {
+		if (not oneDimensional) {
+			const Vector3d bfield = c->current.getBfield();
+			p += std::sprintf(buffer + p, "%8.5E\t%8.5E\t%8.5E\t", bfield.x, bfield.y,
+					bfield.z);
+		} 
 	}
 	if (fields.test(CurrentDirectionColumn)) {
 		if (not oneDimensional) {

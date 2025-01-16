@@ -119,6 +119,9 @@ namespace crpropa {
 
 		current.setPosition(yOut.x);
 		current.setDirection(yOut.u.getUnitVector());
+		Vector3d bField = getFieldAtPosition(yOut.x, z);
+		current.setBfield(bField);
+		
 		candidate->setCurrentStep(step);
 		candidate->setNextStep(newStep);
 	}
